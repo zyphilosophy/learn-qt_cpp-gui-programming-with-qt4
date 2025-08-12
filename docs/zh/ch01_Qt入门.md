@@ -46,11 +46,11 @@ int main(int argc, char *argv[]) {
 所有命令都必须在特定的命令行环境中执行，而不是普通的 `cmd.exe` 或 `PowerShell`。你需要根据你的目标平台（32位或64位）启动对应的 Visual Studio 工具提示符。
 
 *   **对于 64 位编译 (x64):**
-    *   在开始菜单搜索并打开 **`x64 Native Tools Command Prompt for VS 2022`** (或你的 VS 版本对应的名称)。
-    *   这是最常用的选项，因为你的 Qt 库是64位的 (`msvc2019_64`)。
+    *   在开始菜单搜索并打开 **`x64 Native Tools Command Prompt for VS`** (例如 `... for VS 2022` 或 `... for VS 2019`)。
+    *   你选择的工具提示符版本应与你安装的 Qt 库版本（例如 `msvc2019_64` 对应 VS 2019）相匹配。
 
 *   **对于 32 位编译 (x86):**
-    *   在开始菜单搜索并打开 **`x86 Native Tools Command Prompt for VS 2022`**。
+    *   在开始菜单搜索并打开 **`x86 Native Tools Command Prompt for VS`**。
 
 **为什么这很重要？**
 这个专用的命令行工具会预先设置好所有必要的环境变量，让 `qmake` 和 `nmake` 能够找到编译器 (`cl.exe`)、链接器 (`link.exe`) 以及所有系统和 C++ 库。如果使用普通终端，就会出现 `cl` 找不到或者库冲突的错误。
@@ -149,6 +149,28 @@ qmake -tp vc 01hello.pro
 
 
 ## QObject::connect
+`QObject::connect` 是 Qt 核心机制——信号与槽（Signals and Slots）的实现。它用于将一个对象的信号（Signal）与另一个对象的槽（Slot）连接起来。当信号被发出（emit）时，所有与之连接的槽函数都会被自动调用。
+
+- **工作原理:**
+  - **信号 (Signal):** 当对象的状态发生改变时，可以发出一个信号。例如，`QPushButton` 在被点击时会发出 `clicked()` 信号。信号是类的成员函数，但只需要声明，不需要实现。
+  - **槽 (Slot):** 一个普通的 C++ 成员函数，用于响应特定的信号。当信号发出时，槽函数会被执行。
+  - **连接 (Connection):** `connect` 函数将信号和槽关联起来，建立起通信的桥梁。
+
+- **两种连接语法:**
+  1.  **基于函数指针的语法 (Qt 5+):**
+      ```cpp
+      QObject::connect(sender, &Sender::valueChanged, receiver, &Receiver::setValue);
+      ```
+      这是推荐的现代语法。
+      - **优点:** 编译时类型检查，如果信号或槽不存在或参数不匹配，会导致编译错误。更安全，也支持 C++11 的 lambda 表达式。
+  2.  **基于字符串的语法 (Qt 4):**
+      ```cpp
+      QObject::connect(sender, SIGNAL(valueChanged(int)), receiver, SLOT(setValue(int)));
+      ```
+      - **缺点:** 缺乏编译时检查。如果信号或槽的名称拼写错误，只会在运行时产生一个难以调试的警告。
+
+在下面的 `quit.cpp` 示例中，我们将按钮的 `clicked()` 信号连接到了应用程序的 `quit()` 槽，从而实现了点击按钮退出程序的功能。
+
 ### quit.cpp
 ```cpp
 #include <QApplication>
@@ -157,7 +179,13 @@ qmake -tp vc 01hello.pro
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
   QPushButton *quit = new QPushButton("quit");
-  QObject::connect(quit, SIGNAL(clicked()), &a, SLOT(quit()));
+
+  // 使用 Qt 5+ 的新语法（推荐，类型安全）
+  QObject::connect(quit, &QPushButton::clicked, &a, &QApplication::quit);
+
+  // 使用 Qt 4 的旧语法
+  // QObject::connect(quit, SIGNAL(clicked()), &a, SLOT(quit()));
+
   quit->show();
   return a.exec();
 }
@@ -211,6 +239,34 @@ int main(int argc, char *argv[]) {
   return a.exec();
 }
 ```
+
+### 信号与槽的重载问题
+在上面的例子中，你可能注意到了这样一行特殊的连接代码：
+```cpp
+QObject::connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), slider,
+                 &QSlider::setValue);
+```
+**为什么需要 `QOverload<int>::of()`？**
+
+这是因为 `QSpinBox` 类中有两个同名但参数不同的 `valueChanged` 信号：
+1.  `void valueChanged(int i)`
+2.  `void valueChanged(const QString &text)`
+
+当我们使用函数指针语法 `&QSpinBox::valueChanged` 时，C++ 编译器无法确定我们想要连接的是哪一个版本，从而导致编译错误。
+
+为了解决这个“二义性”问题，我们需要明确指定我们想要的是接收 `int` 类型参数的那个信号版本。Qt 提供了 `QOverload` 模板（需要 C++14 支持）来优雅地解决这个问题：
+- `QOverload<int>::of(&QSpinBox::valueChanged)`: 这段代码会返回一个明确指向 `valueChanged(int)` 版本的函数指针。
+
+**另一种方法 (C++11):**
+如果你使用的编译器不支持 C++14，你也可以使用 `static_cast` 来解决：
+```cpp
+QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                 slider, &QSlider::setValue);
+```
+这种方法功能相同，但可读性稍差。
+
+相比之下，`QSlider` 的 `valueChanged(int)` 信号没有重载，所以我们可以直接使用 `&QSlider::valueChanged` 进行连接，无需任何特殊处理。
+
 ## QWidget
 `QWidget` 是所有用户界面对象的基类，通常被称为“窗口部件”或“控件”。
 
