@@ -52,3 +52,12 @@ compile_commands.json
 *creator.user*
 
 *_qmlcache.qrc
+
+
+# 编译过程和输出
+# *.exe
+*.stash
+# *.obj
+**/debug/
+**/release/
+
