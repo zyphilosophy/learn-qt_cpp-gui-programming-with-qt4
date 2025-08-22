@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 
 ---
 
-#### **前提条件：正确的命令行环境**
+### 前提条件：正确的命令行环境
 
 所有命令都必须在特定的命令行环境中执行，而不是普通的 `cmd.exe` 或 `PowerShell`。你需要根据你的目标平台（32位或64位）启动对应的 Visual Studio 工具提示符。
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
 ---
 
-#### **第一步：生成项目文件 (`.pro`)**
+### 第一步：生成项目文件 (`.pro`)
 
 **命令:**
 ```bash
@@ -70,7 +70,7 @@ qmake -project
 
 ---
 
-#### **第二步：生成 Makefile**
+### 第二步：生成 Makefile
 
 **命令:**
 ```bash
@@ -87,7 +87,7 @@ qmake 01hello.pro
 
 ---
 
-#### **第三步：编译和链接**
+### 第三步：编译和链接
 
 **命令:**
 ```bash
@@ -104,7 +104,7 @@ nmake
 
 ---
 
-#### **第四步（可选）：清理项目**
+### 第四步（可选）：清理项目
 
 **命令:**
 ```bash
@@ -118,7 +118,7 @@ nmake distclean   # 彻底清理
 
 ---
 
-#### **高级用法：生成 Visual Studio 项目文件**
+### 高级用法：生成 Visual Studio 项目文件
 
 **命令:**
 ```bash
@@ -135,7 +135,7 @@ qmake -tp vc 01hello.pro
 *   **何时使用:** 当你想脱离命令行，完全在 Visual Studio IDE 中进行开发、编译和调试时，就使用这个命令。它为你搭建了从 Qt 项目到 VS IDE 的桥梁。
 *   **注意:** 生成 `.vcxproj` 文件后，对源文件或项目设置的修改（比如添加新文件）应该在 Visual Studio 中进行，或者在修改 `.pro` 文件后重新运行此命令来同步更新 VS 项目。
   
-#### **总结：一个完整的构建流程**
+### 总结：一个完整的构建流程
 
 假设你从零开始，在一个名为 `my_app` 的文件夹里只有 `main.cpp`。
 
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 
 在 `quit.cpp` 示例中，`new QPushButton("quit")` 创建了一个显示文本 "quit" 的按钮。通过 `QObject::connect` 将其 `clicked()` 信号连接到应用程序的 `quit()` 槽，实现了点击按钮退出程序的功能。
 
-# 窗口布局
+## 窗口布局
 ```cpp
 #include <QApplication>
 #include <QHBoxLayout>
@@ -267,7 +267,7 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 
 相比之下，`QSlider` 的 `valueChanged(int)` 信号没有重载，所以我们可以直接使用 `&QSlider::valueChanged` 进行连接，无需任何特殊处理。
 
-## QWidget
+### QWidget
 `QWidget` 是所有用户界面对象的基类，通常被称为“窗口部件”或“控件”。
 
 - **核心概念:**
@@ -278,7 +278,7 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 
 在“窗口布局”示例中，`QWidget window;` 创建了一个顶级窗口，作为所有其他控件（滑块、数字输入框）的容器。
 
-### QHBoxLayout
+#### QHBoxLayout
 `QHBoxLayout` 是一个布局管理器，用于将控件在水平方向上排列。
 
 - **主要作用:**
@@ -288,7 +288,7 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 
 在示例中，`QHBoxLayout` 被用来将 `QSlider` 和 `QSpinBox` 水平并排放在 `window` 控件中。`layout->addWidget()` 方法将控件添加到布局中，`window.setLayout(layout)` 将该布局应用到窗口上。
 
-### QSlider
+#### QSlider
 `QSlider` 是一个经典的滑块控件，允许用户通过拖动滑块在一个指定的整数范围内选择一个值。
 
 - **主要特性:**
@@ -304,7 +304,7 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 
 在示例中，`QSlider` 和 `QSpinBox` 的 `valueChanged` 信号与对方的 `setValue` 槽相连接，实现了两者之间的双向数据同步。
 
-### QSpinBox
+#### QSpinBox
 `QSpinBox` 是一个数字输入控件，通常由一个显示当前值的文本框和一对用于增加/减少值的上下箭头按钮组成。
 
 - **主要特性:**
@@ -321,9 +321,9 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 在示例中，`QSpinBox` 提供了一种精确输入数值的方式，并与 `QSlider` 实现了数据同步，用户既可以通过拖动滑块来改变值，也可以通过点击箭头或直接输入来改变值。
 
 
-### 参考文档
+## 参考文档
 
-#### 官方在线文档 (最推荐)
+### 官方在线文档 (最推荐)
 这是最权威、最及时、内容最全面的方式。Qt 官方会持续更新在线文档。
 
 访问地址: doc.qt.io
@@ -332,7 +332,7 @@ QObject::connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueC
 包含所有 Qt 模块、类、函数以及详细的示例代码。
 强大的搜索功能。
 使用建议: 将这个网站收藏到您的浏览器书签中。在开发时，这是最可靠的参考来源。您可以直接搜索类名，例如搜索 QSlider 就能找到其详细文档。
-#### Qt Assistant (离线文档)
+### Qt Assistant (离线文档)
 这是一个包含在 Qt SDK 中的离线文档查看器。如果您在安装 Qt 时选择了文档组件，那么它就已经在您的电脑上了。
 
 如何启动:
